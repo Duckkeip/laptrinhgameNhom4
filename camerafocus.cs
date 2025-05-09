@@ -4,7 +4,7 @@ public class CameraFollow : MonoBehaviour
 {
     public Transform target;
     public Vector3 offset = new Vector3(0, 1, -10);
-    public float smoothTime = 0.2f;  // càng nhỏ càng theo sát, giảm trượt
+    public float smoothTime = 0.2f;
 
     private Vector3 velocity = Vector3.zero;
 
@@ -12,7 +12,12 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
-        Vector3 targetPosition = new Vector3(target.position.x + offset.x, transform.position.y, offset.z);
+        Vector3 targetPosition = new Vector3(
+            target.position.x + offset.x,
+            target.position.y + offset.y,
+            offset.z
+        );
+
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
     }
 }
