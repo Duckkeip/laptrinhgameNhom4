@@ -1,3 +1,4 @@
+// nhớ chỉnh gravity scale = 1.25f
 using UnityEngine;
 
 public class Behaviour : MonoBehaviour
