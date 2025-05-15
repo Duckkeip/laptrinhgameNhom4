@@ -1,4 +1,4 @@
-// nhớ chỉnh gravity scale = 1.25f
+//thêm ani của slide tường
 using UnityEngine;
 
 public class Behaviour : MonoBehaviour
@@ -48,10 +48,9 @@ public class Behaviour : MonoBehaviour
 
         
         // Flip sprite
-        if (horizontalInput < 0)
-            spr.flipX = true;
-        else if (horizontalInput > 0)
-            spr.flipX = false;
+        
+
+
 
         ani.SetBool("Run", horizontalInput != 0);
         ani.SetBool("Jump", !isGrounded());
@@ -64,6 +63,11 @@ public class Behaviour : MonoBehaviour
 
         WallSlide();
         WallJump();
+
+        if (isWallJumping)
+        {
+            Flip();
+        }
     }
 
     private void FixedUpdate()
@@ -115,6 +119,7 @@ public class Behaviour : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f)
         {
+            isFacingRight = !isFacingRight;
             isWallJumping = true;
             body.linearVelocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
             wallJumpingCounter = 0f;
@@ -158,4 +163,16 @@ public class Behaviour : MonoBehaviour
         );
         return raycastHit.collider != null;
     }
+
+     private void Flip()
+    {
+        if (isFacingRight && horizontalInput < 0f || !isFacingRight && horizontalInput > 0f)
+        {
+            isFacingRight = !isFacingRight;
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1f;
+            transform.localScale = localScale;
+        }
+    }
+
 }
