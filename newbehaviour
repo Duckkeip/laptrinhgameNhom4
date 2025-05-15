@@ -15,17 +15,20 @@ public class Behaviour : MonoBehaviour
     private bool isFacingRight = true;
     private bool isWallSliding;
     private bool isWallJumping;
+    private bool hasWallJumped;
+
+
     private float wallJumpingCounter;
     private float wallJumpingDirection;
 
     [SerializeField] private float speed = 3f;
     [SerializeField] private float sprintSpeed = 5.5f;
-    [SerializeField] private float jumpSpeed = 5f;
+    [SerializeField] private float jumpSpeed = 5.5f;
 
-    [SerializeField] private float wallSlidingSpeed = 4f;
-    [SerializeField] private float wallJumpingTime = 2f;// thoi gian co the nhay lan nua khi cham tuong
+    [SerializeField] private float wallSlidingSpeed = 6f;
+    [SerializeField] private float wallJumpingTime = 1f;// thoi gian co the nhay lan nua khi cham tuong
     [SerializeField] private float wallJumpingDuration = 0.2f;
-    [SerializeField] public Vector2 wallJumpingPower = new Vector2(5f, 4f);
+    [SerializeField] public Vector2 wallJumpingPower = new Vector2(5f, 5.5f);
 
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask wallLayer;
@@ -51,18 +54,25 @@ public class Behaviour : MonoBehaviour
         ani.SetBool("Run", horizontalInput != 0);
         ani.SetBool("Jump", !isGrounded());
         ani.SetBool("Sprint", isSprinting && horizontalInput != 0);
+        ani.SetBool("Slide", isWallSliding);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space))
         {
             Jump();
+            if(isWallSliding){
+            WallJump();
+            }
+       
         }
+        if (isGrounded() || !isWallSliding)
+        {
+            hasWallJumped = false; //
+        }
+
 
         WallSlide();
         Flip();
-        if(isWallSliding){
-        WallJump();
-        }
-       
+        
     }
 
     private void FixedUpdate()
@@ -91,46 +101,49 @@ public class Behaviour : MonoBehaviour
         {
             isWallSliding = true;
             body.linearVelocity = new Vector2(body.linearVelocity.x, Mathf.Clamp(body.linearVelocity.y, -wallSlidingSpeed, float.MaxValue));
+            ani.SetBool("Slide", true);
         }
         else
         {
             isWallSliding = false;
+            ani.SetBool("Slide", false);
         }
     }
 
     private void WallJump()
-    {
-        if (isWallSliding)
         {
-            isWallJumping = false;
-            wallJumpingDirection = -transform.localScale.x;
-            wallJumpingCounter = wallJumpingTime;
-            CancelInvoke(nameof(StopWallJumping));
-        }
-        else
-        {
-            wallJumpingCounter -= Time.deltaTime;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f)
-        {
-            isFacingRight = !isFacingRight;
-            isWallJumping = true;
-
-            body.linearVelocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
-            wallJumpingCounter = 0f;
-
-        
-             Vector3 scale = transform.localScale;
-            if ((wallJumpingDirection < 0 && scale.x > 0) || (wallJumpingDirection > 0 && scale.x < 0))
-             {
-            scale.x *= -1f;
-            transform.localScale = scale;
+            if (isWallSliding && !hasWallJumped)
+            {
+                wallJumpingDirection = -Mathf.Sign(transform.localScale.x);
+                wallJumpingCounter = wallJumpingTime;
+                CancelInvoke(nameof(StopWallJumping));
+            }
+            else
+            {
+                wallJumpingCounter -= Time.deltaTime;
             }
 
-            Invoke(nameof(StopWallJumping), wallJumpingDuration);
+            if (Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f && !hasWallJumped)
+            {
+                isFacingRight = !isFacingRight;
+                isWallJumping = true;
+                hasWallJumped = true; // 🔥 Đánh dấu đã nhảy khỏi tường
+
+                body.linearVelocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
+                wallJumpingCounter = 0f;
+
+                // Flip bằng localScale
+                Vector3 scale = transform.localScale;
+                if ((wallJumpingDirection < 0 && scale.x > 0) || (wallJumpingDirection > 0 && scale.x < 0))
+                {
+                    scale.x *= -1f;
+                    transform.localScale = scale;
+                }
+
+                Invoke(nameof(StopWallJumping), wallJumpingDuration);
+            }
         }
-    }
+
 
     private void StopWallJumping()
     {
