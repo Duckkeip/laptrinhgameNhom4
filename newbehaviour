@@ -1,4 +1,3 @@
-//thêm ani của slide tường
 using UnityEngine;
 
 public class Behaviour : MonoBehaviour
@@ -38,19 +37,16 @@ public class Behaviour : MonoBehaviour
         ani = GetComponent<Animator>();
         boxcoll = GetComponent<BoxCollider2D>();
     }
-
+    private void Start()
+    {
+            spr.flipX = false;
+    }
     private void Update()
     {
         horizontalInput = Input.GetAxis("Horizontal");
 
         bool isSprinting = Input.GetKey(KeyCode.LeftShift);
         currentSpeed = isSprinting ? sprintSpeed : speed;
-
-        
-        // Flip sprite
-        
-
-
 
         ani.SetBool("Run", horizontalInput != 0);
         ani.SetBool("Jump", !isGrounded());
@@ -62,12 +58,11 @@ public class Behaviour : MonoBehaviour
         }
 
         WallSlide();
+        Flip();
+        if(isWallSliding){
         WallJump();
-
-        if (isWallJumping)
-        {
-            Flip();
         }
+       
     }
 
     private void FixedUpdate()
@@ -121,13 +116,17 @@ public class Behaviour : MonoBehaviour
         {
             isFacingRight = !isFacingRight;
             isWallJumping = true;
+
             body.linearVelocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
             wallJumpingCounter = 0f;
 
-            if ((wallJumpingDirection < 0 && !spr.flipX) || (wallJumpingDirection > 0 && spr.flipX))
-                {
-                    spr.flipX = wallJumpingDirection < 0;
-                }
+        
+             Vector3 scale = transform.localScale;
+            if ((wallJumpingDirection < 0 && scale.x > 0) || (wallJumpingDirection > 0 && scale.x < 0))
+             {
+            scale.x *= -1f;
+            transform.localScale = scale;
+            }
 
             Invoke(nameof(StopWallJumping), wallJumpingDuration);
         }
@@ -164,15 +163,16 @@ public class Behaviour : MonoBehaviour
         return raycastHit.collider != null;
     }
 
-     private void Flip()
-    {
-        if (isFacingRight && horizontalInput < 0f || !isFacingRight && horizontalInput > 0f)
+   private void Flip()
         {
-            isFacingRight = !isFacingRight;
-            Vector3 localScale = transform.localScale;
-            localScale.x *= -1f;
-            transform.localScale = localScale;
+            if ((isFacingRight && horizontalInput < 0f) || (!isFacingRight && horizontalInput > 0f))
+            {
+                isFacingRight = !isFacingRight;
+                Vector3 localScale = transform.localScale;
+                localScale.x *= -1f;
+                transform.localScale = localScale;
+            }
         }
-    }
+
 
 }
