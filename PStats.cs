@@ -7,10 +7,20 @@ public class PStats : MonoBehaviour
     public Slider manaBar;
     public Slider staminaBar;
 
-    private float stamina = 1f;
-    private bool isJumping = false;
+    public float stamina = 1f;
+    public float maxStamina = 1f;
+    public bool isJumping = false;
 
-    public bool IsExhausted => stamina <= 0f;
+    private float regenDelay = 2f;             // Delay trước khi bắt đầu hồi
+    private float regenTimer = 0f;
+    private float staminaRegenRate = 0.2f;     // Tốc độ hồi (có thể chỉnh)
+
+    private bool isConsuming = false;
+    private bool exhausted = false;
+
+    public bool IsExhausted => exhausted;
+    public bool IsLowStamina => stamina < 0.2f;
+
 
     void Start()
     {
@@ -21,50 +31,68 @@ public class PStats : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.H))
+        if (exhausted)
         {
-            Debug.Log("press H");
-            healthBar.value -= 0.1f;
+            // Hồi dần cho đến khi đầy thì thoát exhausted
+            stamina += Time.deltaTime * staminaRegenRate;
+
+            if (stamina >= maxStamina)
+            {
+                stamina = maxStamina;
+                exhausted = false;
+                regenTimer = 0f;
+            }
+        }
+        else
+        {
+            if (!isConsuming && !isJumping)
+            {
+                regenTimer += Time.deltaTime;
+
+                if (regenTimer >= regenDelay)
+                {
+                    // Nếu stamina < max thì mới hồi
+                    if (stamina < maxStamina)
+                    {
+                        stamina += Time.deltaTime * staminaRegenRate;
+                        stamina = Mathf.Clamp(stamina, 0f, maxStamina);
+                    }
+                }
+            }
+            else
+            {
+                regenTimer = 0f;
+            }
+
+            // Nếu stamina tụt xuống 0 thì exhausted
+            if (stamina <= 0f)
+            {
+                stamina = 0f;
+                exhausted = true;
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            Debug.Log("press M");
-            manaBar.value -= 0.1f;
-        }
+        isConsuming = false;
 
-        // Hồi stamina nếu không nhảy
-        
-
-        stamina = Mathf.Clamp01(stamina);
+        // Cập nhật thanh bar
+        stamina = Mathf.Clamp(stamina, 0f, maxStamina);
+        staminaBar.value = stamina;
         healthBar.value = Mathf.Clamp01(healthBar.value);
         manaBar.value = Mathf.Clamp01(manaBar.value);
-        staminaBar.value = stamina;
-    }
-
-    public void RestoreSta(float amount ){
-            stamina += Time.deltaTime * 0.5f;
-        
     }
 
     public void ReduceStamina(float amount)
     {
+        if (exhausted) return;
+
         stamina -= amount;
-        stamina = Mathf.Clamp01(stamina);
+        stamina = Mathf.Clamp(stamina, 0f, maxStamina);
         staminaBar.value = stamina;
+        isConsuming = true;
     }
 
     public void SetJumping(bool value)
     {
         isJumping = value;
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.collider.CompareTag("Enemy"))
-        {
-            Debug.Log("Chạm Enemy.");
-            healthBar.value -= 0.1f;
-        }
     }
 }
