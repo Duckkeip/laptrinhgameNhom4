@@ -14,20 +14,20 @@ public class Behave : MonoBehaviour
 
     private float horizontalInput;
     private float currentSpeed;
+    private float wallJumpingCounter;
+    private float wallJumpingDirection;
 
     private bool isFacingRight = true;
     private bool isWallSliding;
     private bool isWallJumping;
-    private bool hasWallJumped;
-
-    private float wallJumpingCounter;
-    private float wallJumpingDirection;
-
+    private bool hasWallJumped = false;
+    
+    
     [SerializeField] private float speed = 3f;
     [SerializeField] private float sprintSpeed = 5.5f;
     [SerializeField] private float jumpSpeed = 5.5f;
 
-    [SerializeField] private float wallSlidingSpeed = 1f;
+    [SerializeField] private float wallSlidingSpeed = 6f;
     [SerializeField] private float wallJumpingTime = 1f;
     [SerializeField] private float wallJumpingDuration = 0.2f;
     [SerializeField] public Vector2 wallJumpingPower = new Vector2(5f, 5.5f);
@@ -54,11 +54,12 @@ public class Behave : MonoBehaviour
         horizontalInput = Input.GetAxis("Horizontal");
 
         bool isSprinting = Input.GetKey(KeyCode.LeftShift) && !pStats.IsExhausted;
-        currentSpeed = isSprinting ? sprintSpeed : speed;
+        currentSpeed = pStats.IsExhausted ? speed * 0.5f : (isSprinting ? sprintSpeed : speed);  // chậm lại khi exhausted
+
 
         ani.SetBool("Run", horizontalInput != 0);
-        ani.SetBool("Jump", !isGrounded());
-        ani.SetBool("Sprint", isSprinting && horizontalInput != 0);
+        ani.SetBool("Jump", !isGrounded() && !pStats.IsExhausted && onWall()) ;
+        ani.SetBool("Sprint", isSprinting && horizontalInput != 0 && !pStats.IsExhausted);
         ani.SetBool("Slide", isWallSliding);
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -66,15 +67,20 @@ public class Behave : MonoBehaviour
             if (!pStats.IsExhausted)
             {
                 Jump();
-                pStats.ReduceStamina(0.1f);
+                pStats.ReduceStamina(0.085f);
                 pStats.SetJumping(true);
+                
             }
-            else
+            else 
             {
-                pStats.RestoreSta(0.6f);
-                Debug.Log("Run out of Stamina");
-            }
+                
+                Debug.Log("ANBATUKAM!!");
+                
+                }
+                
         }
+       //here
+        
 
         if (isGrounded() || !isWallSliding)
         {
@@ -82,11 +88,23 @@ public class Behave : MonoBehaviour
         }
 
         // Trừ stamina khi chạy
-        if (isSprinting && horizontalInput != 0)
+        if (isSprinting && horizontalInput != 0 )
         {
-            pStats.ReduceStamina(Time.deltaTime * 0.1f);
+            pStats.ReduceStamina(Time.deltaTime * 0.02f);
         }
 
+        if (pStats.IsExhausted)
+        {
+            spr.color = Color.gray; // exhausted = màu xám
+        }
+        else if (pStats.stamina < 0.2f)
+        {
+            spr.color = new Color(1f, 0.7f, 0.7f); // stamina thấp = đỏ nhạt
+        }
+        else
+        {
+            spr.color = Color.white; // bình thường
+        }
         WallJump();
         WallSlide();
         Flip();
@@ -129,7 +147,7 @@ public class Behave : MonoBehaviour
 
     private void WallJump()
     {
-        if (isWallSliding && !hasWallJumped)
+        if (isWallSliding && hasWallJumped)
         {
             wallJumpingDirection = -Mathf.Sign(transform.localScale.x);
             wallJumpingCounter = wallJumpingTime;
@@ -140,7 +158,7 @@ public class Behave : MonoBehaviour
             wallJumpingCounter -= Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f && !hasWallJumped && !pStats.IsExhausted)
+        if (Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f && hasWallJumped && !pStats.IsExhausted)
         {
             isFacingRight = !isFacingRight;
             isWallJumping = true;
@@ -156,7 +174,7 @@ public class Behave : MonoBehaviour
                 transform.localScale = scale;
             }
 
-            pStats.ReduceStamina(0.1f);
+            pStats.ReduceStamina(0.05f);
             pStats.SetJumping(true);
 
             Invoke(nameof(StopWallJumping), wallJumpingDuration);
