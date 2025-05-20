@@ -61,13 +61,13 @@ public class Behave : MonoBehaviour
         ani.SetBool("Jump", !isGrounded() && !pStats.IsExhausted && onWall()) ;
         ani.SetBool("Sprint", isSprinting && horizontalInput != 0 && !pStats.IsExhausted);
         ani.SetBool("Slide", isWallSliding);
-
+        ani.SetBool("Tired", pStats.IsExhausted);
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (!pStats.IsExhausted)
+            if (!pStats.IsExhausted && (isGrounded() || onWall()))// neu ko met va cham dat hoac tuong thi nhay mat Sta
             {
                 Jump();
-                pStats.ReduceStamina(0.085f);
+                pStats.ReduceStamina(0.065f);
                 pStats.SetJumping(true);
                 
             }
@@ -93,13 +93,14 @@ public class Behave : MonoBehaviour
             pStats.ReduceStamina(Time.deltaTime * 0.02f);
         }
 
-        if (pStats.IsExhausted)
-        {
-            spr.color = Color.gray; // exhausted = màu xám
-        }
-        else if (pStats.stamina < 0.2f)
+        
+       if (pStats.stamina < 0.2f)
         {
             spr.color = new Color(1f, 0.7f, 0.7f); // stamina thấp = đỏ nhạt
+                if (pStats.IsExhausted)
+            {
+                Tired(); // exhausted = màu xám
+            }
         }
         else
         {
@@ -114,7 +115,10 @@ public class Behave : MonoBehaviour
     {
         body.linearVelocity = new Vector2(horizontalInput * currentSpeed, body.linearVelocity.y);
     }
-
+    private void Tired()
+    {
+        ani.SetTrigger("Tireda");
+    }
     private void Jump()
     {
         if (isGrounded())
