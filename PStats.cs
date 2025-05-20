@@ -91,6 +91,24 @@ public class PStats : MonoBehaviour
         isConsuming = true;
     }
 
+    public void TakeDamage(float amount)
+    {
+        healthBar.value -= amount;
+        healthBar.value = Mathf.Clamp01(healthBar.value);
+
+        Debug.Log("Player bị trúng đòn! HP còn lại: " + healthBar.value);
+
+        if (healthBar.value <= 0f)
+        {
+            Die();
+        }
+    }
+    private void Die()
+    {
+        Debug.Log("Player đã chết!");
+        // Xử lý chết ở đây, ví dụ: tắt nhân vật
+        gameObject.SetActive(false); // hoặc Destroy(gameObject);
+    }    
     public void SetJumping(bool value)
     {
         isJumping = value;
