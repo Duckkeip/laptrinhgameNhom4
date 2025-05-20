@@ -16,6 +16,8 @@ public class Behave : MonoBehaviour
     private float currentSpeed;
     private float wallJumpingCounter;
     private float wallJumpingDirection;
+    private float bounceForce = 10f;
+
 
     private bool isFacingRight = true;
     private bool isWallSliding;
@@ -61,7 +63,7 @@ public class Behave : MonoBehaviour
         ani.SetBool("Jump", !isGrounded() && !pStats.IsExhausted && onWall()) ;
         ani.SetBool("Sprint", isSprinting && horizontalInput != 0 && !pStats.IsExhausted);
         ani.SetBool("Slide", isWallSliding);
-        ani.SetBool("Tired", pStats.IsExhausted);
+        ani.SetBool("Tired_Idle", pStats.IsExhausted);
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (!pStats.IsExhausted && (isGrounded() || onWall()))// neu ko met va cham dat hoac tuong thi nhay mat Sta
@@ -117,7 +119,7 @@ public class Behave : MonoBehaviour
     }
     private void Tired()
     {
-        ani.SetTrigger("Tireda");
+        ani.SetTrigger("Tired_Idlea");
     }
     private void Jump()
     {
@@ -131,6 +133,18 @@ public class Behave : MonoBehaviour
             float wallDirection = horizontalInput > 0 ? 1 : -1;
             body.linearVelocity = new Vector2(-wallDirection * wallJumpingPower.x, wallJumpingPower.y);
             ani.SetTrigger("Jumpa");
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            Vector2 bounceDirection = (transform.position - collision.transform.position).normalized;
+            body.linearVelocity = Vector2.zero; // 
+            body.AddForce(bounceDirection * bounceForce, ForceMode2D.Impulse);
+       
+            GetComponent<PStats>().TakeDamage(0.2f); // 
         }
     }
 
