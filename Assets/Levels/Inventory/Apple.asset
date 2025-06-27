@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1635f5c64999b3a41b35aae126685be5, type: 3}
   m_Name: Apple
   m_EditorClassIdentifier: 
+  itemID: 1
   itemName: Apple
   icon: {fileID: 9139289913481491577, guid: 1ddc9afd21fec77489b1248d18f31b68, type: 3}
   type: 0
   healAmount: 0.1
   staminaAmount: 0.1
-  manaAmount: 0
-  quantity: 1
+  manaAmount: 0.2

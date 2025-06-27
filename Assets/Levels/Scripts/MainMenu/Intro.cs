@@ -41,12 +41,17 @@ public class UIManager : MonoBehaviour
         if (data != null)
         {
             // Lưu lại dữ liệu
-            GameData.Instance.playerHealth = data.playerHealth;
-            GameData.Instance.playerScore = data.playerScore;
-            GameData.Instance.playerPosition = data.playerPosition.ToVector3();
+        GameData.Instance.playerHealth = data.playerHealth;
+        GameData.Instance.playerSTA = data.playerSTA;
+        GameData.Instance.playerMana = data.playerMana;
+        GameData.Instance.playerScore = data.playerScore;
+        GameData.Instance.playerPosition = data.playerPosition.ToVector3();
+        GameData.Instance.sceneName = data.sceneName;
+        GameData.Instance.inventoryItems = data.inventoryItems;
+        GameData.Instance.isLoadingFromSave = true;
 
-            SceneManager.LoadScene(data.sceneName);
-        }
+        SceneManager.LoadScene(data.sceneName);
+            }
         else
         {
             Debug.LogWarning("Không tìm thấy file save!");

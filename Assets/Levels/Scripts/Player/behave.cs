@@ -45,7 +45,11 @@ public class Behave : MonoBehaviour
     [SerializeField] private LayerMask wallLayer;
 
     private void Awake()
-    {
+    {   
+        if (Instance == null){
+            Instance = this;
+        }
+        
           if (GameData.Instance == null)
             {
                 GameObject prefab = Resources.Load<GameObject>("GameData");
@@ -70,11 +74,10 @@ public class Behave : MonoBehaviour
 
     private void Update()
     {
+        bool isSprinting = Sprint();
         horizontalInput = Input.GetAxis("Horizontal");
 
-        bool isSprinting = Input.GetKey(KeyCode.LeftShift) && !pStats.IsExhausted;
-        currentSpeed = pStats.IsExhausted ? speed * 0.5f : (isSprinting ? sprintSpeed : speed);  // chậm lại khi exhausted
-
+       
 
         ani.SetBool("Run", horizontalInput != 0);
         ani.SetBool("Jump", !isGrounded() && !pStats.IsExhausted && onWall()) ;
@@ -110,10 +113,7 @@ public class Behave : MonoBehaviour
         }
 
         // Trừ stamina khi chạy
-        if (isSprinting && horizontalInput != 0 )
-        {
-            pStats.ReduceStamina(Time.deltaTime * 0.02f);
-        }
+        
 
         
        if (pStats.stamina < 0.2f)
@@ -128,6 +128,7 @@ public class Behave : MonoBehaviour
         {
             spr.color = Color.white; // bình thường
         }
+        Sprint();
         WallJump();
         WallSlide();
         Flip();
@@ -151,25 +152,50 @@ public class Behave : MonoBehaviour
             Debug.Log("Đang rơi với tốc độ: " + fallSpeed);
         }
     }
+    private bool Sprint()
+        {
+            if (isGrounded())
+            {
+                bool isSprinting = Input.GetKey(KeyCode.LeftShift) && !pStats.IsExhausted;
+
+                currentSpeed = pStats.IsExhausted ? speed * 0.5f : (isSprinting ? sprintSpeed : speed);
+
+                if (isSprinting && horizontalInput != 0)
+                {
+                    pStats.ReduceStamina(Time.deltaTime * 0.02f);
+                }
+
+                return isSprinting;
+            }
+            else
+            {
+                // Không sprint khi đang trên không
+                currentSpeed = speed;
+                return false;
+            }
+        }
     private void Tired()
     {
         ani.SetTrigger("Tired_Idlea");
     }
-    private void Jump()
-    {
-        if (isGrounded())
-        {
-            body.linearVelocity = new Vector2(body.linearVelocity.x, jumpSpeed);
-            ani.SetTrigger("Jumpa");
-        }
-        else if (onWall() && !isGrounded())
-        {
-            float wallDirection = horizontalInput > 0 ? 1 : -1;
-            body.linearVelocity = new Vector2(-wallDirection * wallJumpingPower.x, wallJumpingPower.y);
-            ani.SetTrigger("Jumpa");
-        }
-    }
 
+
+    private void Jump()
+        {
+            if (isGrounded())
+            {
+                // Giữ lại velocity.x để lấy đà khi nhảy
+                body.linearVelocity = new Vector2(body.linearVelocity.x, jumpSpeed); 
+                ani.SetTrigger("Jumpa");
+            }
+            else if (onWall() && !isGrounded())
+            {
+                // Wall jump thì có thể reset hướng
+                float wallDirection = horizontalInput > 0 ? 1 : -1;
+                body.linearVelocity = new Vector2(-wallDirection * wallJumpingPower.x, wallJumpingPower.y);
+                ani.SetTrigger("Jumpa");
+            }
+        }
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
@@ -239,7 +265,7 @@ public class Behave : MonoBehaviour
         isWallJumping = false;
     }
 
-    private bool isGrounded()
+    public bool isGrounded()
     {
         RaycastHit2D raycastHit = Physics2D.BoxCast(
             boxcoll.bounds.center,

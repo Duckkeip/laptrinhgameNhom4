@@ -835,7 +835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startButton: {fileID: 1895606393}
   continueButton: {fileID: 409141495}
-  settingsPanel: {fileID: 0}
+  settingsPanel: {fileID: 1001607092}
   exitButton: {fileID: 554549479}
 --- !u!1 &1001607092
 GameObject:
@@ -1707,7 +1707,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1895606394}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1001468016}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1895606394
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Tạo enum BÊN NGOÀI class để tránh lỗi
+// Enum đặt bên ngoài class
 public enum ItemType
 {
     Consumable,
@@ -12,14 +12,16 @@ public enum ItemType
 [CreateAssetMenu(fileName = "NewItem", menuName = "Inventory/Item")]
 public class ItemData : ScriptableObject
 {
+    [Header("General Info")]
+    public string itemID;        // ID duy nhất để phân biệt khi lưu/đọc JSON
     public string itemName;
     public Sprite icon;
     public ItemType type;
 
-    public float healAmount = 0f;      // hồi máu
-    public float staminaAmount = 0f;   
+    [Header("Effect Values")]
+    public float healAmount = 0f;
+    public float staminaAmount = 0f;
     public float manaAmount = 0f;
 
-    [HideInInspector]
-    public int quantity = 1;
+    // quantity sẽ được quản lý riêng bởi InventoryItem, không nên để ở đây
 }

@@ -17,6 +17,8 @@ public class QuickSave : MonoBehaviour
             if (data != null)
             {
                 GameData.Instance.playerHealth = data.playerHealth;
+                GameData.Instance.playerMana = data.playerMana;
+                GameData.Instance.playerSTA = data.playerSTA;
                 GameData.Instance.playerScore = data.playerScore;
                 GameData.Instance.playerPosition = data.playerPosition.ToVector3();
                 SceneManager.LoadScene(data.sceneName); // quay lại scene đã lưu

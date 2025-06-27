@@ -4,8 +4,9 @@ public class Fruit : MonoBehaviour
 {   
     public ItemData itemToAdd;
 
-    private float amountHP = 0.3f;
-    private float amount =0.2f;
+    //private float amountHP = 0.3f;
+    //private float amount = 0.2f;
+    
     private Animator ani;
     public GameObject pressEUI;
     private bool isPlayerNearby = false;

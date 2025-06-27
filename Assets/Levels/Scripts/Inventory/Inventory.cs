@@ -4,8 +4,9 @@ using UnityEngine;
 public class Inventory : MonoBehaviour
 {
     public static Inventory Instance;
-    public List<InventoryItem> items = new List<InventoryItem>(); 
-    
+    public List<InventoryItem> items = new List<InventoryItem>();
+
+  
     public delegate void OnInventoryChanged();
     public event OnInventoryChanged onInventoryChangedCallback;
 
@@ -44,4 +45,32 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    public void LoadInventory(List<SerializableInventoryItem> savedItems)
+    {
+        items.Clear();
+        foreach (SerializableInventoryItem sItem in savedItems)
+        {
+            ItemData itemData = ItemDatabase.GetItemByID(sItem.itemID);
+            if (itemData != null)
+            {
+                InventoryItem newItem = new InventoryItem(itemData, sItem.quantity);
+                items.Add(newItem);
+            }
+        }
+        onInventoryChangedCallback?.Invoke();
+    }
+
+    public List<SerializableInventoryItem> SaveInventory()
+    {
+        List<SerializableInventoryItem> savedItems = new List<SerializableInventoryItem>();
+        foreach (var item in items)
+        {
+            savedItems.Add(new SerializableInventoryItem
+            {
+                itemID = item.data.itemID,
+                quantity = item.quantity
+            });
+        }
+        return savedItems;
+    }
 }

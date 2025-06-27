@@ -44,6 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57b3e51c3a6aa174e8a35e26873cea20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isLoadingFromSave: 0
   playerHealth: 100
+  playerSTA: 100
+  playerMana: 100
   playerScore: 0
   playerPosition: {x: 0, y: 0, z: 0}
